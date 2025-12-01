@@ -4,8 +4,8 @@
 
 ## 技术栈
 
-- **后端**: Rust, Axum, SQLx, SQLite
-- **前端**: Vue 3, Vite, TypeScript (假设)
+- **后端**: Rust, Axum, SQLite
+- **前端**: React, TypeScript
 - **部署**: Docker, Docker Compose, Nginx
 
 ## 项目目录结构
