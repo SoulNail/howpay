@@ -2,13 +2,13 @@
 
 这是一个基于 **Rust (Axum)** 和 **Vue 3** 的轻量级资产管理应用。项目采用前后端分离架构，使用 Docker Compose 进行一键部署。
 
-## 🛠 技术栈
+## 技术栈
 
 - **后端**: Rust, Axum, SQLx, SQLite
 - **前端**: Vue 3, Vite, TypeScript (假设)
 - **部署**: Docker, Docker Compose, Nginx
 
-## 📂 项目目录结构
+## 项目目录结构
 
 为了配合 Docker Compose 部署，建议您的项目目录结构如下：
 
@@ -31,7 +31,7 @@ project-root/
 
 ---
 
-## 🚀 部署步骤
+## 部署步骤
 
 ### 使用 Docker Compose 启动
 
@@ -44,14 +44,14 @@ docker-compose up -d --build
 - `-d`: 后台运行
 - `--build`: 强制重新构建镜像（确保 Rust 代码更新生效）
 
-### 第三步：访问应用
+### 访问应用
 
 打开浏览器访问：
-**http://你的IP:8080**
+**http://localhost:8080**
 
 ---
 
-## ⚠️ 数据持久化警告
+## 数据持久化警告
 
 根据目前的配置，**数据库文件 `assets.db` 存储在 `backend` 容器内部**。
 
@@ -70,7 +70,7 @@ docker-compose up -d --build
 
 ---
 
-## 📝 API 接口说明
+## API 接口说明
 
 | 方法 | 路径 | 描述 |
 | :--- | :--- | :--- |
