@@ -1,0 +1,339 @@
+:root {
+  --bg-color: #f5f5f7;
+  --card-blue-start: #4c82f5;
+  --card-blue-end: #5b90fa;
+  --card-green-start: #7dcba4;
+  --card-green-end: #6dbf95;
+  --text-white: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --modal-bg: #ffffff;
+  --input-bg: #f5f5f7;
+  --text-dark: #1d1d1f;
+  --max-app-width: 600px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* --- 最外层包装器：负责整体居中 --- */
+.app-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* --- 内容容器：限制宽度 --- */
+.app-container {
+  width: 100%;
+  max-width: var(--max-app-width);
+  background-color: var(--bg-color);
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* --- 顶部卡片 --- */
+.header-card {
+  background: linear-gradient(135deg, var(--card-blue-start) 0%, var(--card-blue-end) 100%);
+  border-radius: 20px;
+  padding: 24px 20px;
+  margin-bottom: 24px; 
+  box-shadow: 0 4px 15px rgba(76, 130, 245, 0.3);
+  color: var(--text-white);
+}
+
+.header-top-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.header-title {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-item {
+  flex: 1;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 26px;
+  font-weight: bold;
+}
+
+.divider {
+  width: 1px;
+  height: 30px;
+  background-color: rgba(255,255,255,0.2);
+  margin: 0 10px;
+}
+
+/* --- 设备列表 --- */
+.list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 100px;
+}
+
+.empty-state {
+  color: #86868b;
+  text-align: center;
+  margin-top: 40px;
+  font-size: 14px;
+}
+
+/* --- 设备卡片 --- */
+.device-card {
+  background: linear-gradient(90deg, var(--card-green-start) 0%, var(--card-green-end) 100%);
+  border-radius: 16px;
+  padding: 18px 16px;
+  display: flex;
+  align-items: center;
+  color: var(--text-white);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.device-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.icon-wrapper {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255,255,255,0.2);
+  border-radius: 12px;
+  margin-right: 16px;
+  color: #333;
+  flex-shrink: 0;
+}
+
+.device-icon-svg {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.device-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.device-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.device-meta {
+  font-size: 13px;
+  color: rgba(255,255,255,0.9);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.dot-separator {
+  margin: 0 6px;
+  font-size: 10px;
+}
+
+.days-wrapper {
+  text-align: right;
+  min-width: 60px;
+  margin-left: 10px;
+  margin-right: 24px;
+}
+
+.days-count {
+  font-size: 20px;
+  font-weight: 600;
+  margin-right: 2px;
+}
+
+.days-label {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.delete-btn:hover {
+  color: #ff4d4f;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* --- 悬浮按钮 (FAB) - 居中显示 --- */
+.fab {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: var(--card-blue-start);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(76, 130, 245, 0.4);
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.2s;
+}
+
+.fab:hover {
+  transform: translateX(-50%) scale(1.1);
+  box-shadow: 0 6px 16px rgba(76, 130, 245, 0.5);
+}
+
+/* 移动端适配 */
+@media (max-width: 600px) {
+  .fab {
+    bottom: 24px;
+    width: 56px;
+    height: 56px;
+  }
+}
+
+/* --- 模态框 --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background-color: var(--modal-bg);
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 340px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  border: 1px solid #e5e5e5;
+}
+
+.modal-title {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  color: var(--text-dark);
+  text-align: center;
+}
+
+.input-group {
+  margin-bottom: 16px;
+}
+
+.input-label {
+  display: block;
+  color: #86868b;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.form-input, .form-select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #d2d2d7;
+  background-color: var(--input-bg);
+  color: var(--text-dark);
+  font-size: 14px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus, .form-select:focus {
+  border-color: var(--card-blue-start);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.btn-cancel {
+  background-color: #e5e5e5;
+  color: var(--text-dark);
+}
+
+.btn-confirm {
+  background-color: var(--card-blue-start);
+  color: var(--text-white);
+}
