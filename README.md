@@ -2,6 +2,14 @@
 
 这是一个基于 **Rust (Axum)** 和 **Vue 3** 的轻量级资产管理应用。项目采用前后端分离架构，使用 Docker Compose 进行一键部署。
 
+## 项目预览
+
+| 资产列表 (主页) | 添加设备 (弹窗) |
+| :---: | :---: |
+| <img src="./frontend.png" width="300" /> | <img src="./add%20device.png" width="300" /> |
+
+> *注：左图为主页资产概览，右图为添加新设备的交互界面。*
+
 ## 技术栈
 
 - **后端**: Rust, Axum, SQLite
