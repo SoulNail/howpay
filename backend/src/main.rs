@@ -1,7 +1,8 @@
 use axum::{
     extract::{Path, State},
     http::Method,
-    routing::{delete, get, post},
+    // 修复 1: 移除了未使用的 'post'
+    routing::{delete, get},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
@@ -9,20 +10,17 @@ use sqlx::{sqlite::SqlitePoolOptions, FromRow, SqlitePool};
 use std::net::SocketAddr;
 use tower_http::{
     cors::{Any, CorsLayer},
-    services::ServeDir,
+    // 修复 2: 移除了未使用的 'services::ServeDir'
+    // services::ServeDir, 
 };
 use uuid::Uuid;
 
 // --- 数据模型 ---
-// FromRow: 允许 sqlx 把数据库查询结果直接转换成结构体
-// Serialize/Deserialize: 允许和 JSON 互相转换
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 struct Device {
     id: String,
     name: String,
     price: f64,
-    // 数据库里叫 purchase_date (下划线)，前端 JSON 叫 purchaseDate (驼峰)
-    // 我们使用 rename 属性来自动映射
     #[serde(rename = "purchaseDate")]
     #[sqlx(rename = "purchase_date")]
     purchase_date: String,
@@ -31,7 +29,6 @@ struct Device {
     icon_type: String,
 }
 
-// 用于接收前端创建请求的结构体（不需要 ID，ID 由后端生成）
 #[derive(Debug, Deserialize)]
 struct CreateDevicePayload {
     name: String,
@@ -44,7 +41,6 @@ struct CreateDevicePayload {
 
 // --- 数据库初始化 ---
 async fn init_db() -> SqlitePool {
-    // 连接字符串：会在当前目录下寻找或创建 assets.db
     let db_url = "sqlite://assets.db?mode=rwc";
     
     let pool = SqlitePoolOptions::new()
@@ -53,7 +49,6 @@ async fn init_db() -> SqlitePool {
         .await
         .expect("无法连接数据库");
 
-    // 创建表结构
     sqlx::query(
         r#"
         CREATE TABLE IF NOT EXISTS devices (
@@ -79,7 +74,7 @@ async fn get_devices(State(pool): State<SqlitePool>) -> Json<Vec<Device>> {
     let devices = sqlx::query_as::<_, Device>("SELECT * FROM devices ORDER BY purchase_date DESC")
         .fetch_all(&pool)
         .await
-        .unwrap_or_else(|_| vec![]); // 如果出错返回空数组
+        .unwrap_or_else(|_| vec![]);
 
     Json(devices)
 }
@@ -91,7 +86,6 @@ async fn add_device(
 ) -> Json<Device> {
     let new_id = Uuid::new_v4().to_string();
     
-    // 插入数据库
     sqlx::query(
         "INSERT INTO devices (id, name, price, purchase_date, icon_type) VALUES (?, ?, ?, ?, ?)",
     )
@@ -104,7 +98,6 @@ async fn add_device(
     .await
     .expect("插入数据失败");
 
-    // 返回完整的对象给前端
     let new_device = Device {
         id: new_id,
         name: payload.name,
@@ -136,9 +129,9 @@ async fn main() {
     let pool = init_db().await;
     println!("Database connected.");
 
-    // 2. 配置 CORS (允许前端跨域访问)
+    // 2. 配置 CORS
     let cors = CorsLayer::new()
-        .allow_origin(Any) // 生产环境建议指定具体域名，开发环境用 Any
+        .allow_origin(Any)
         .allow_methods([Method::GET, Method::POST, Method::DELETE])
         .allow_headers(Any);
 
@@ -147,11 +140,9 @@ async fn main() {
         // API 路由
         .route("/api/devices", get(get_devices).post(add_device))
         .route("/api/devices/:id", delete(delete_device))
-        // 静态文件路由 (前端打包后的文件)
+        // 静态文件路由 (暂时注释掉，所以上面不需要引入 ServeDir)
         // .fallback_service(ServeDir::new("../dist")) 
-        // 注入数据库连接池
         .with_state(pool)
-        // 注入 CORS 中间件
         .layer(cors);
 
     // 4. 启动服务器

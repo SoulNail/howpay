@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import './App.css';
+import './App.css'; // 确保引入了下方的 CSS
 
 // --- 类型定义 ---
 interface Device {
@@ -23,10 +23,10 @@ const calculateDaysOwned = (dateString: string): number => {
 };
 
 const formatCurrency = (amount: number) => {
-  return `¥${amount.toFixed(2)}`;
+  return `¥${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
-// --- SVG 图标组件 ---
+// --- SVG 图标组件 (保持不变) ---
 const DeviceIcon = ({ type }: { type: string }) => {
   const className = "device-icon-svg";
   switch (type) {
@@ -40,27 +40,30 @@ const DeviceIcon = ({ type }: { type: string }) => {
 };
 
 const TrashIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff4d4f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="3 6 5 6 21 6"></polyline>
     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
   </svg>
 );
 
-// --- 主组件 ---
 const AssetTrackerApp: React.FC = () => {
-  // 修改 1: 初始状态为空数组，数据将从后端加载
   const [devices, setDevices] = useState<Device[]>([]);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  // 表单状态
   const [newDeviceName, setNewDeviceName] = useState('');
   const [newDevicePrice, setNewDevicePrice] = useState('');
   const [newDeviceDate, setNewDeviceDate] = useState('');
   const [newDeviceType, setNewDeviceType] = useState<Device['iconType']>('other');
 
-  // 修改 2: 使用 useEffect 在组件加载时获取数据
   useEffect(() => {
+    // 模拟数据加载（如果你还没有后端，先用这个注释掉的代码测试 UI）
+    /*
+    const mockData: Device[] = [
+      { id: '1', name: 'iPhone 15 Pro', price: 8999, purchaseDate: '2023-10-01', iconType: 'phone' }
+    ];
+    setDevices(mockData);
+    */
+
     fetch('/api/devices')
       .then(res => {
         if (!res.ok) throw new Error('网络响应不正常');
@@ -81,14 +84,12 @@ const AssetTrackerApp: React.FC = () => {
     return { totalAsset, totalDailyCost };
   }, [devices]);
 
-  // 修改 3: 发送 POST 请求添加设备
   const handleAddDevice = () => {
     if (!newDeviceName || !newDevicePrice || !newDeviceDate) {
       alert("请填写完整信息");
       return;
     }
 
-    // 构建发送给后端的数据（不需要 ID，后端会生成）
     const payload = {
       name: newDeviceName,
       price: parseFloat(newDevicePrice),
@@ -98,9 +99,7 @@ const AssetTrackerApp: React.FC = () => {
 
     fetch('/api/devices', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
     .then(res => {
@@ -108,7 +107,6 @@ const AssetTrackerApp: React.FC = () => {
       return res.json();
     })
     .then((savedDevice: Device) => {
-      // 后端返回了完整的对象（包含 ID），将其添加到列表最前面
       setDevices([savedDevice, ...devices]);
       resetForm();
       setIsModalOpen(false);
@@ -118,16 +116,12 @@ const AssetTrackerApp: React.FC = () => {
     });
   };
 
-  // 修改 4: 发送 DELETE 请求删除设备
   const handleDeleteDevice = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (window.confirm('确定要删除这个设备吗？')) {
-      fetch(`/api/devices/${id}`, {
-        method: 'DELETE',
-      })
+      fetch(`/api/devices/${id}`, { method: 'DELETE' })
       .then(res => {
         if (!res.ok) throw new Error('删除失败');
-        // 删除成功后，更新本地状态
         setDevices(devices.filter(d => d.id !== id));
       })
       .catch(err => {
@@ -168,7 +162,9 @@ const AssetTrackerApp: React.FC = () => {
         {/* --- 设备列表 --- */}
         <div className="list-container">
           {devices.length === 0 ? (
-            <div className="empty-state">暂无设备，点击右下角添加</div>
+            <div className="empty-state">
+              <div className="empty-text">暂无设备，点击右下角添加</div>
+            </div>
           ) : (
             devices.map(device => {
               const daysOwned = calculateDaysOwned(device.purchaseDate);
@@ -176,31 +172,32 @@ const AssetTrackerApp: React.FC = () => {
 
               return (
                 <div key={device.id} className="device-card">
-                  <div className="icon-wrapper">
-                    <DeviceIcon type={device.iconType} />
-                  </div>
-                  
-                  <div className="device-info">
-                    <div className="device-name">{device.name}</div>
-                    <div className="device-meta">
-                      <span className="device-price">{formatCurrency(device.price)}</span>
-                      <span className="dot-separator">•</span>
-                      <span className="device-daily">¥{dailyCost.toFixed(1)}/天</span>
+                  <div className="card-left">
+                    <div className="icon-wrapper">
+                        <DeviceIcon type={device.iconType} />
+                    </div>
+                    <div className="device-info">
+                        <div className="device-name">{device.name}</div>
+                        <div className="device-meta">
+                        <span className="device-price">{formatCurrency(device.price)}</span>
+                        <span className="dot-separator">•</span>
+                        <span className="device-daily">¥{dailyCost.toFixed(1)}/天</span>
+                        </div>
                     </div>
                   </div>
 
-                  <div className="days-wrapper">
-                    <span className="days-count">{daysOwned}</span>
-                    <span className="days-label">天</span>
+                  <div className="card-right">
+                    <div className="days-wrapper">
+                        <span className="days-count">{daysOwned}</span>
+                        <span className="days-label">天</span>
+                    </div>
+                    <button 
+                        className="delete-btn" 
+                        onClick={(e) => handleDeleteDevice(device.id, e)}
+                    >
+                        <TrashIcon />
+                    </button>
                   </div>
-
-                  <button 
-                    className="delete-btn" 
-                    onClick={(e) => handleDeleteDevice(device.id, e)}
-                    title="删除设备"
-                  >
-                    <TrashIcon />
-                  </button>
                 </div>
               );
             })
