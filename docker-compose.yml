@@ -24,6 +24,6 @@ services:
     container_name: assets-frontend
     restart: always
     ports:
-      - "8080:80" # 浏览器访问 http://localhost:8080
+      - "9090:80" # 浏览器访问 http://localhost:8080
     depends_on:
       - backend-service # 等待后端启动
