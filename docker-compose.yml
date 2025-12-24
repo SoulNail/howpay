@@ -8,13 +8,15 @@ services:
       dockerfile: Dockerfile
     container_name: assets-backend
     restart: always
-    ports:
-      - "3000:3000" # 暴露出来仅供调试，实际前端通过内部网络访问
+    # ports:
+    #   - "3000:3000" # 暴露出来仅供调试，实际前端通过内部网络访问
+    expose:
+      - "3000"
     volumes:
       # 重要！将宿主机的数据库文件挂载到容器内
       # 这样容器重启或删除后，数据不会丢失
       # 确保你的 backend 目录下有一个 assets.db 文件，或者允许代码自动创建
-      - ./backend/data:/app/backend/data/
+      - ./backend/data:/app/data
 
   # --- 前端服务 ---
   frontend-service:
