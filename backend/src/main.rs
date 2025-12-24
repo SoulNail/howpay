@@ -41,7 +41,7 @@ struct CreateDevicePayload {
 
 // --- 数据库初始化 ---
 async fn init_db() -> SqlitePool {
-    let db_url = "sqlite:./data/backend/assets.db?mode=rwc";
+    let db_url = "sqlite:./data/assets.db?mode=rwc";
     
     let pool = SqlitePoolOptions::new()
         .max_connections(5)
