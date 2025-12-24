@@ -14,7 +14,7 @@ services:
       # 重要！将宿主机的数据库文件挂载到容器内
       # 这样容器重启或删除后，数据不会丢失
       # 确保你的 backend 目录下有一个 assets.db 文件，或者允许代码自动创建
-      - ./backend/assets.db:/app/assets.db
+      - ./backend/data:/app/backend/data
 
   # --- 前端服务 ---
   frontend-service:
@@ -24,6 +24,6 @@ services:
     container_name: assets-frontend
     restart: always
     ports:
-      - "4040:80" # 浏览器访问 http://localhost:8080
+      - "4040:80" # 浏览器访问 http://localhost:4040
     depends_on:
       - backend-service # 等待后端启动
