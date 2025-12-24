@@ -1,372 +1,330 @@
-/* --- 1. 全局重置与根节点设定 (这是修复靠左问题的关键) --- */
+/* App.css - 终极居中修复版 */
+
+/* --- 1. 暴力重置外层容器 (关键步骤) --- */
+/* 确保 React 的根节点占满屏幕，清除默认干扰 */
 html, body, #root {
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
   margin: 0;
   padding: 0;
   overflow-x: hidden; /* 防止横向滚动条 */
-  background-color: #f0f2f5; /* 确保背景色统一 */
 }
 
-* {
-  box-sizing: border-box; /* 确保 padding 不会撑大宽高 */
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+/* --- 全局变量 --- */
+:root {
+  --primary-color: #007aff;
+  --bg-color: #f2f4f6;
+  --card-bg: #ffffff;
+  --text-main: #1c1c1e;
+  --text-secondary: #8e8e93;
+  --danger-color: #ff3b30;
+  --header-gradient: linear-gradient(135deg, #2c3e50 0%, #000000 100%);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --radius-lg: 16px;
+  --radius-md: 12px;
 }
 
-/* --- 2. 容器布局 --- */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
 
-/* App Wrapper: 它是最外层，必须强制撑满屏幕宽度，才能居中内部元素 */
+/* --- 2. 布局容器 (使用 Flex 强制居中) --- */
 .app-wrapper {
-  width: 100vw;       /* 强制占满视口宽度 */
-  min-height: 100vh;  /* 最小高度为视口高度 */
-  display: flex;      /* 启用 Flex 布局 */
-  justify-content: center; /* 水平居中核心代码 */
-  align-items: flex-start; /* 垂直方向从顶部开始 */
-  background-color: #f0f2f5;
-  padding-top: 0;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;           /* 开启 Flex 布局 */
+  justify-content: center; /* 水平方向强制居中 */
+  align-items: flex-start; /* 垂直方向从顶部开始 (防止长页面被切头) */
+  background-color: var(--bg-color);
+  padding-top: 20px;
+  box-sizing: border-box;
 }
 
-/* App Container: 模拟手机屏幕的白色容器 */
 .app-container {
   width: 100%;
-  max-width: 440px; /* 限制最大宽度，模拟手机手感 */
-  min-height: 100vh;
-  background-color: #ffffff;
+  max-width: 480px; /* 限制最大宽度 */
   position: relative;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.08); /* 加深阴影让它在灰色背景上更立体 */
-  padding-bottom: 100px;
-  display: flex;       /* 确保内部布局可控 */
-  flex-direction: column;
+  padding: 0 20px 100px 20px; /* 底部留白给按钮 */
+  box-sizing: border-box;
+  /* Flex 子元素如果不设 flex-grow，会自动收缩适应内容，这里确保它占满 max-width */
+  flex-shrink: 0; 
 }
 
-/* --- 3. 顶部卡片 --- */
+/* --- 顶部总览卡片 --- */
 .header-card {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: var(--header-gradient);
   color: white;
-  padding: 32px 24px 24px 24px; /* 增加顶部 padding 避开可能的刘海区 */
-  border-bottom-left-radius: 24px;
-  border-bottom-right-radius: 24px;
-  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 24px;
   margin-bottom: 24px;
-  flex-shrink: 0; /* 防止被压缩 */
+  box-shadow: var(--shadow-md);
 }
+
+.header-top-row { margin-bottom: 20px; }
 
 .header-title {
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  font-size: 18px;
+  font-weight: 500;
+  opacity: 0.9;
 }
 
 .stats-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 24px;
 }
 
-.stat-item {
-  flex: 1;
-  text-align: center;
-}
-
-.stat-label {
-  font-size: 13px;
-  opacity: 0.85;
-  margin-bottom: 6px;
-  font-weight: 400;
-}
-
-.stat-value {
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
+.stat-item { flex: 1; }
 
 .divider {
   width: 1px;
-  height: 30px;
+  height: 40px;
   background-color: rgba(255, 255, 255, 0.2);
-  margin: 0 10px;
+  margin: 0 20px;
 }
 
-/* --- 4. 列表区域 --- */
+.stat-label {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* --- 列表区域 --- */
 .list-container {
-  padding: 0 16px;
-  flex: 1; /* 占满剩余空间 */
-}
-
-/* 空状态修复：确保水平垂直居中 */
-.empty-state {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 300px; /* 给定高度以便居中 */
-  color: #9ca3af;
-  font-size: 14px;
+  gap: 12px;
+  width: 100%; /* 确保填满容器 */
+}
+
+.empty-state {
   text-align: center;
+  padding: 40px 0;
+  color: var(--text-secondary);
 }
 
-.empty-text {
-  margin-top: 10px;
-}
-
-/* --- 5. 设备卡片样式 --- */
+/* --- 设备卡片 --- */
 .device-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-md);
+  padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
-  border: 1px solid #f3f4f6;
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 12px;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .device-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 15px rgba(0,0,0,0.06);
-  border-color: #e5e7eb;
+  box-shadow: var(--shadow-md);
 }
 
 .card-left {
   display: flex;
   align-items: center;
-  gap: 14px;
-  overflow: hidden; /* 防止长文本溢出 */
+  gap: 12px;
+  flex: 1;
 }
 
 .icon-wrapper {
   width: 44px;
   height: 44px;
-  background-color: #f3f4f6;
-  border-radius: 12px;
+  background-color: #f0f2f5;
+  border-radius: 10px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  color: #4b5563;
-  flex-shrink: 0;
+  justify-content: center;
+  color: #555;
+  flex-shrink: 0; /* 防止图标被压缩 */
 }
 
-.device-icon-svg {
-  width: 22px;
-  height: 22px;
-}
+.device-icon-svg { width: 24px; height: 24px; }
 
 .device-info {
   display: flex;
   flex-direction: column;
-  min-width: 0; /* 允许 Flex 子元素收缩 */
 }
 
 .device-name {
-  font-weight: 600;
   font-size: 16px;
-  color: #111827;
+  font-weight: 600;
+  color: var(--text-main);
   margin-bottom: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .device-meta {
-  font-size: 12px;
-  color: #6b7280;
+  font-size: 13px;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
 }
 
-.dot-separator {
-  margin: 0 6px;
-  font-size: 12px;
-  color: #d1d5db;
-}
-
-.device-daily {
-  color: #4f46e5;
-  font-weight: 500;
-}
+.dot-separator { margin: 0 6px; font-size: 8px; opacity: 0.6; }
+.device-daily { color: var(--primary-color); font-weight: 500; }
 
 .card-right {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
 }
 
 .days-wrapper {
   text-align: right;
-  background-color: #ecfdf5;
-  padding: 6px 10px;
-  border-radius: 8px;
-  color: #059669;
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
+  background: #f7f9fc;
+  padding: 4px 8px;
+  border-radius: 6px;
 }
 
-.days-count {
-  font-weight: 700;
-  font-size: 15px;
-}
-
-.days-label {
-  font-size: 11px;
-}
+.days-count { font-size: 14px; font-weight: 700; color: var(--text-main); }
+.days-label { font-size: 12px; color: var(--text-secondary); margin-left: 2px; }
 
 .delete-btn {
-  background: transparent;
+  background: none;
   border: none;
   cursor: pointer;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+  padding: 4px;
+  border-radius: 4px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-  color: #ef4444;
-  opacity: 0.6;
 }
 
 .delete-btn:hover {
-  background-color: #fee2e2;
   opacity: 1;
+  background-color: rgba(255, 59, 48, 0.1);
 }
 
-/* --- 6. 悬浮按钮 (FAB) --- */
+/* --- 悬浮按钮 (FAB) - 修改为底部居中 --- */
 .fab {
-  position: fixed; /* 使用 fixed 定位，相对于屏幕，或者 relative 于 container */
-  /* 这里为了保证它始终在手机框内部，我们用 absolute 配合 container 的 relative */
-  position: absolute;
-  bottom: 40px;
+  position: fixed;
+  bottom: 32px; /* 距离底部的距离，可以自己调，比如 40px */
+  
+  /* 核心居中逻辑 */
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%); /* 向左回退自身宽度的一半，实现完美居中 */
+  
+  /* 以下样式保持不变 */
   width: 56px;
   height: 56px;
-  border-radius: 28px;
-  background-color: #4f46e5;
-  color: white;
+  border-radius: 50%;
+  background-color: var(--primary-color);
   border: none;
-  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
-  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50;
-  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+  z-index: 100;
+  
+  /* 移除之前的 margin-left */
+  margin-left: 0; 
 }
 
 .fab:hover {
-  transform: translateX(-50%) scale(1.05);
-  box-shadow: 0 12px 25px rgba(79, 70, 229, 0.5);
+  /* 保持居中(translateX -50%) 的同时进行放大(scale 1.05) */
+  transform: translateX(-50%) scale(1.05); 
+  background-color: #0063d1;
 }
 
-.fab:active {
-  transform: translateX(-50%) scale(0.95);
-}
-
-/* --- 7. 弹窗样式 --- */
+/* --- 弹窗 (Modal) --- */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
 }
 
 .modal-content {
   background: white;
-  width: 85%;
+  width: 90%;
   max-width: 320px;
-  border-radius: 24px;
-  padding: 28px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@keyframes modalPop {
-  from { opacity: 0; transform: scale(0.9) translateY(10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal-title {
+  margin: 0 0 20px 0;
   font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 24px;
-  color: #1f2937;
   text-align: center;
+  font-weight: 700;
 }
 
-.input-group {
-  margin-bottom: 18px;
-}
+.input-group { margin-bottom: 16px; }
 
 .input-label {
   display: block;
   font-size: 13px;
-  color: #6b7280;
-  margin-bottom: 8px;
-  font-weight: 600;
-  margin-left: 2px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  font-weight: 500;
 }
 
 .form-input, .form-select {
   width: 100%;
-  padding: 12px 14px;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  font-size: 15px;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #e1e4e8;
+  border-radius: 10px;
+  box-sizing: border-box;
+  background-color: #f9f9f9;
+  transition: border-color 0.2s;
   outline: none;
-  transition: all 0.2s;
-  background-color: #f9fafb;
 }
 
 .form-input:focus, .form-select:focus {
-  border-color: #6366f1;
+  border-color: var(--primary-color);
   background-color: #fff;
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
 }
 
 .modal-actions {
   display: flex;
   gap: 12px;
-  margin-top: 28px;
+  margin-top: 24px;
 }
 
 .btn {
   flex: 1;
   padding: 12px;
-  border-radius: 12px;
   border: none;
+  border-radius: 10px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  font-size: 15px;
-  transition: background 0.2s;
+  transition: opacity 0.2s;
 }
 
-.btn-cancel {
-  background-color: #f3f4f6;
-  color: #4b5563;
+.btn:active { opacity: 0.8; }
+.btn-cancel { background-color: #f2f2f7; color: var(--text-main); }
+.btn-confirm { background-color: var(--text-main); color: white; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.btn-cancel:hover {
-  background-color: #e5e7eb;
-}
-
-.btn-confirm {
-  background-color: #4f46e5;
-  color: white;
-}
-
-.btn-confirm:hover {
-  background-color: #4338ca;
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }

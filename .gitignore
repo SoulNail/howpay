@@ -1,5 +1,5 @@
 # =========================
-# 全局/系统/IDE 文件
+# 全局/系统/IDE 文件 (任何层级都忽略)
 # =========================
 .DS_Store
 Thumbs.db
@@ -9,51 +9,59 @@ Thumbs.db
 *.swp
 
 # =========================
-# 敏感信息 (非常重要！)
+# 敏感信息 (绝对不能提交！)
 # =========================
-# 务必忽略 .env 文件，防止 API Key 或数据库密码泄露
 .env
 .env.*
-! .env.example
+# 允许提交示例文件 (注意感叹号后无空格)
+!.env.example
+
+# =========================
+# 依赖目录 (任何层级都忽略)
+# =========================
+node_modules/
 
 # =========================
 # Backend (Rust)
 # =========================
-# 忽略编译生成的构建产物 (体积巨大)
-backend/target/
-backend/data/assets.db
+# Rust 构建产物
+target/
 
-# 忽略本地数据库文件 (根据你的文件树 assets.db 看起来像 SQLite 数据库)
-# 如果这是包含初始数据的“种子文件”且体积很小，可以注释掉下面这行
-backend/assets.db
+# 数据库文件 (根据你的 tree 结构)
+# 忽略 data 目录下的所有数据库文件
+backend/data/*.db
+backend/data/*.sqlite
+backend/data/*.db-shm
+backend/data/*.db-wal
 
-# 忽略 Rust 产生的临时备份文件
+# 如果 data 目录里全是动态数据，不想提交任何东西，但想保留目录结构：
+# backend/data/*
+# !backend/data/.gitkeep
+
+# 临时备份
 **/*.rs.bk
 
 # =========================
-# Frontend (Node.js / Vite)
+# Frontend (Vite/React)
 # =========================
-# 忽略依赖包 (体积巨大，可以通过 npm install 恢复)
-frontend/node_modules/
+# 构建输出
+dist/
+dist-ssr/
 
-# 忽略构建输出目录
-frontend/dist/
+# 测试覆盖率
+coverage/
 
-# 忽略本地测试覆盖率报告
-frontend/coverage/
+# npm/yarn/pnpm 调试日志
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# 忽略 npm/yarn/pnpm 日志
-frontend/npm-debug.log*
-frontend/yarn-debug.log*
-frontend/yarn-error.log*
-frontend/pnpm-debug.log*
-
-# 忽略本地环境变量文件
-frontend/.env.local
-frontend/.env.*.local
+# 本地环境配置
+.env.local
+.env.*.local
 
 # =========================
-# Docker (可选)
+# Docker
 # =========================
-# 如果你有本地挂载的数据卷目录，也应该忽略
-# docker-data/
+docker-data/
