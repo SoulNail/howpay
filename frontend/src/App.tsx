@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import './App.css'; // 确保引入了下方的 CSS
 
 // --- 类型定义 ---
@@ -46,6 +47,9 @@ const TrashIcon = () => (
   </svg>
 );
 
+type SortType = 'price' | 'dailyCost' | 'days' | 'default';
+type SortOrder = 'asc' | 'desc';
+
 const AssetTrackerApp: React.FC = () => {
   const [devices, setDevices] = useState<Device[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -56,6 +60,11 @@ const AssetTrackerApp: React.FC = () => {
   const [newDevicePrice, setNewDevicePrice] = useState('');
   const [newDeviceDate, setNewDeviceDate] = useState('');
   const [newDeviceType, setNewDeviceType] = useState<Device['iconType']>('other');
+  
+  const [sortBy, setSortBy] = useState<SortType>('default');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [showChart, setShowChart] = useState(false);
+  const [chartType, setChartType] = useState<'pie' | 'bar'>('pie');
 
   useEffect(() => {
     // 模拟数据加载（如果你还没有后端，先用这个注释掉的代码测试 UI）
@@ -85,6 +94,58 @@ const AssetTrackerApp: React.FC = () => {
     });
     return { totalAsset, totalDailyCost };
   }, [devices]);
+
+  // 排序后的设备列表
+  const sortedDevices = useMemo(() => {
+    if (sortBy === 'default') return devices;
+    
+    const withMetrics = devices.map(device => ({
+      ...device,
+      daysOwned: calculateDaysOwned(device.purchaseDate),
+      dailyCost: device.price / calculateDaysOwned(device.purchaseDate)
+    }));
+    
+    return [...withMetrics].sort((a, b) => {
+      let comparison = 0;
+      if (sortBy === 'price') comparison = a.price - b.price;
+      else if (sortBy === 'dailyCost') comparison = a.dailyCost - b.dailyCost;
+      else if (sortBy === 'days') comparison = a.daysOwned - b.daysOwned;
+      
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+  }, [devices, sortBy, sortOrder]);
+
+  // 图表数据
+  const pieChartData = useMemo(() => {
+    const typeMap: { [key: string]: number } = {};
+    devices.forEach(device => {
+      typeMap[device.iconType] = (typeMap[device.iconType] || 0) + device.price;
+    });
+    
+    const typeLabels: { [key: string]: string } = {
+      phone: '手机',
+      laptop: '电脑',
+      watch: '手表',
+      headphone: '耳机',
+      tablet: '平板',
+      other: '其他'
+    };
+    
+    return Object.entries(typeMap).map(([type, value]) => ({
+      name: typeLabels[type] || type,
+      value
+    }));
+  }, [devices]);
+
+  const barChartData = useMemo(() => {
+    return devices.map(device => ({
+      name: device.name.length > 8 ? device.name.substring(0, 8) + '...' : device.name,
+      value: device.price / calculateDaysOwned(device.purchaseDate),
+      fullName: device.name
+    })).sort((a, b) => b.value - a.value).slice(0, 10);
+  }, [devices]);
+
+  const COLORS = ['#007aff', '#52c41a', '#ff7a45', '#ffc53d', '#722ed1', '#9254de'];
 
   const handleAddDevice = () => {
     if (!newDeviceName || !newDevicePrice || !newDeviceDate) {
@@ -216,6 +277,102 @@ const AssetTrackerApp: React.FC = () => {
           </div>
         </div>
 
+        {/* --- 排序和图表控制 --- */}
+        <div className="controls-container">
+          <div className="sort-controls">
+            <select 
+              className="sort-select"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortType)}
+            >
+              <option value="default">默认排序</option>
+              <option value="price">按价格</option>
+              <option value="dailyCost">按日均成本</option>
+              <option value="days">按拥有天数</option>
+            </select>
+            
+            <button 
+              className="sort-order-btn"
+              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              disabled={sortBy === 'default'}
+            >
+              {sortOrder === 'asc' ? '↑' : '↓'}
+            </button>
+          </div>
+          
+          <button 
+            className="chart-toggle-btn"
+            onClick={() => setShowChart(!showChart)}
+          >
+            {showChart ? '隐藏图表' : '显示图表'}
+          </button>
+        </div>
+
+        {/* --- 图表区域 --- */}
+        {showChart && (
+          <div className="charts-container">
+            <div className="chart-tabs">
+              <button 
+                className={`chart-tab ${chartType === 'pie' ? 'active' : ''}`}
+                onClick={() => setChartType('pie')}
+              >
+                资产分布
+              </button>
+              <button 
+                className={`chart-tab ${chartType === 'bar' ? 'active' : ''}`}
+                onClick={() => setChartType('bar')}
+              >
+                日均成本 TOP10
+              </button>
+            </div>
+            
+            <div className="chart-content">
+              {chartType === 'pie' ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={pieChartData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {pieChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value?: number) => value !== undefined ? formatCurrency(value) : ''} />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={barChartData}>
+                    <XAxis 
+                      dataKey="name" 
+                      tick={{ fontSize: 10 }}
+                      angle={-30}
+                      textAnchor="end"
+                      height={60}
+                    />
+                    <YAxis tick={{ fontSize: 10 }} />
+                    <Tooltip 
+                      formatter={(value?: number) => value !== undefined ? `¥${value.toFixed(1)}/天` : ''}
+                      labelFormatter={(label, payload) => {
+                        const data = payload?.[0]?.payload;
+                        return data?.fullName || label;
+                      }}
+                    />
+                    <Bar dataKey="value" fill="#007aff" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* --- 设备列表 --- */}
         <div className="list-container">
           {devices.length === 0 ? (
@@ -223,7 +380,7 @@ const AssetTrackerApp: React.FC = () => {
               <div className="empty-text">暂无设备，点击右下角添加</div>
             </div>
           ) : (
-            devices.map(device => {
+            sortedDevices.map(device => {
               const daysOwned = calculateDaysOwned(device.purchaseDate);
               const dailyCost = device.price / daysOwned;
 

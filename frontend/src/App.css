@@ -335,6 +335,126 @@ body {
   to { opacity: 1; }
 }
 
+/* --- 控制区域 --- */
+.controls-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.sort-select {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  background-color: #fff;
+  color: var(--text-main);
+  outline: none;
+  cursor: pointer;
+}
+
+.sort-select:focus {
+  border-color: var(--primary-color);
+}
+
+.sort-order-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  background-color: #fff;
+  color: var(--text-main);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sort-order-btn:hover:not(:disabled) {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.sort-order-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.chart-toggle-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid var(--primary-color);
+  border-radius: 8px;
+  background-color: white;
+  color: var(--primary-color);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.chart-toggle-btn:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* --- 图表区域 --- */
+.charts-container {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.chart-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e1e4e8;
+  padding-bottom: 12px;
+}
+
+.chart-tab {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  background-color: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chart-tab:hover {
+  background-color: #f5f5f5;
+}
+
+.chart-tab.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.chart-content {
+  min-height: 300px;
+}
+
 @keyframes slideUp {
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
