@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import './App.css'; // 确保引入了下方的 CSS
 
 // --- 类型定义 ---
@@ -340,7 +340,7 @@ const AssetTrackerApp: React.FC = () => {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {pieChartData.map((entry, index) => (
+                      {pieChartData.map((_entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
