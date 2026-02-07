@@ -1,8 +1,7 @@
 use axum::{
     extract::{Path, State},
     http::Method,
-    // 修复 1: 移除了未使用的 'post'
-    routing::{delete, get},
+    routing::{delete, get, put},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
@@ -123,6 +122,35 @@ async fn delete_device(
     Json(serde_json::json!({ "status": "ok" }))
 }
 
+// PUT /api/devices/:id
+async fn update_device(
+    State(pool): State<SqlitePool>,
+    Path(id): Path<String>,
+    Json(payload): Json<CreateDevicePayload>,
+) -> Json<Device> {
+    sqlx::query(
+        "UPDATE devices SET name = ?, price = ?, purchase_date = ?, icon_type = ? WHERE id = ?",
+    )
+    .bind(&payload.name)
+    .bind(payload.price)
+    .bind(&payload.purchase_date)
+    .bind(&payload.icon_type)
+    .bind(&id)
+    .execute(&pool)
+    .await
+    .expect("更新数据失败");
+
+    let updated_device = Device {
+        id: id,
+        name: payload.name,
+        price: payload.price,
+        purchase_date: payload.purchase_date,
+        icon_type: payload.icon_type,
+    };
+
+    Json(updated_device)
+}
+
 #[tokio::main]
 async fn main() {
     // 1. 初始化数据库
@@ -132,14 +160,14 @@ async fn main() {
     // 2. 配置 CORS
     let cors = CorsLayer::new()
         .allow_origin(Any)
-        .allow_methods([Method::GET, Method::POST, Method::DELETE])
+        .allow_methods([Method::GET, Method::POST, Method::DELETE, Method::PUT])
         .allow_headers(Any);
 
     // 3. 构建路由
     let app = Router::new()
         // API 路由
         .route("/api/devices", get(get_devices).post(add_device))
-        .route("/api/devices/:id", delete(delete_device))
+        .route("/api/devices/:id", delete(delete_device).put(update_device))
         // 静态文件路由 (暂时注释掉，所以上面不需要引入 ServeDir)
         // .fallback_service(ServeDir::new("../dist")) 
         .with_state(pool)

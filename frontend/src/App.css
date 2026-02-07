@@ -190,7 +190,13 @@ body {
 .days-count { font-size: 14px; font-weight: 700; color: var(--text-main); }
 .days-label { font-size: 12px; color: var(--text-secondary); margin-left: 2px; }
 
-.delete-btn {
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.edit-btn, .delete-btn {
   background: none;
   border: none;
   cursor: pointer;
@@ -200,6 +206,11 @@ body {
   transition: opacity 0.2s;
   display: flex;
   align-items: center;
+}
+
+.edit-btn:hover {
+  opacity: 1;
+  background-color: rgba(82, 196, 26, 0.1);
 }
 
 .delete-btn:hover {

@@ -49,6 +49,8 @@ const TrashIcon = () => (
 const AssetTrackerApp: React.FC = () => {
   const [devices, setDevices] = useState<Device[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingDeviceId, setEditingDeviceId] = useState<string | null>(null);
   
   const [newDeviceName, setNewDeviceName] = useState('');
   const [newDevicePrice, setNewDevicePrice] = useState('');
@@ -90,6 +92,17 @@ const AssetTrackerApp: React.FC = () => {
       return;
     }
 
+    // 验证日期不能是未来日期
+    const purchaseDate = new Date(newDeviceDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    purchaseDate.setHours(0, 0, 0, 0);
+    
+    if (purchaseDate > today) {
+      alert("购买日期不能是未来日期");
+      return;
+    }
+
     const payload = {
       name: newDeviceName,
       price: parseFloat(newDevicePrice),
@@ -97,23 +110,47 @@ const AssetTrackerApp: React.FC = () => {
       iconType: newDeviceType
     };
 
-    fetch('/api/devices', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-    .then(res => {
-      if (!res.ok) throw new Error('添加失败');
-      return res.json();
-    })
-    .then((savedDevice: Device) => {
-      setDevices([savedDevice, ...devices]);
-      resetForm();
-      setIsModalOpen(false);
-    })
-    .catch(err => {
-      alert("添加设备出错: " + err.message);
-    });
+    if (isEditMode && editingDeviceId) {
+      // 编辑模式
+      fetch(`/api/devices/${editingDeviceId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('更新失败');
+        return res.json();
+      })
+      .then((updatedDevice: Device) => {
+        setDevices(devices.map(d => d.id === editingDeviceId ? updatedDevice : d));
+        resetForm();
+        setIsModalOpen(false);
+        setIsEditMode(false);
+        setEditingDeviceId(null);
+      })
+      .catch(err => {
+        alert("更新设备出错: " + err.message);
+      });
+    } else {
+      // 添加模式
+      fetch('/api/devices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('添加失败');
+        return res.json();
+      })
+      .then((savedDevice: Device) => {
+        setDevices([savedDevice, ...devices]);
+        resetForm();
+        setIsModalOpen(false);
+      })
+      .catch(err => {
+        alert("添加设备出错: " + err.message);
+      });
+    }
   };
 
   const handleDeleteDevice = (id: string, e: React.MouseEvent) => {
@@ -135,7 +172,27 @@ const AssetTrackerApp: React.FC = () => {
     setNewDevicePrice('');
     setNewDeviceDate('');
     setNewDeviceType('other');
+    setIsEditMode(false);
+    setEditingDeviceId(null);
   };
+
+  const handleEditDevice = (device: Device, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditMode(true);
+    setEditingDeviceId(device.id);
+    setNewDeviceName(device.name);
+    setNewDevicePrice(device.price.toString());
+    setNewDeviceDate(device.purchaseDate);
+    setNewDeviceType(device.iconType);
+    setIsModalOpen(true);
+  };
+
+  const EditIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#52c41a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+    </svg>
+  );
 
   return (
     <div className="app-wrapper">
@@ -191,12 +248,20 @@ const AssetTrackerApp: React.FC = () => {
                         <span className="days-count">{daysOwned}</span>
                         <span className="days-label">天</span>
                     </div>
-                    <button 
-                        className="delete-btn" 
-                        onClick={(e) => handleDeleteDevice(device.id, e)}
-                    >
-                        <TrashIcon />
-                    </button>
+                    <div className="card-actions">
+                      <button 
+                          className="edit-btn" 
+                          onClick={(e) => handleEditDevice(device, e)}
+                      >
+                          <EditIcon />
+                      </button>
+                      <button 
+                          className="delete-btn" 
+                          onClick={(e) => handleDeleteDevice(device.id, e)}
+                      >
+                          <TrashIcon />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -209,11 +274,11 @@ const AssetTrackerApp: React.FC = () => {
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </button>
 
-        {/* --- 添加设备弹窗 --- */}
+        {/* --- 添加/编辑设备弹窗 --- */}
         {isModalOpen && (
           <div className="modal-overlay">
             <div className="modal-content">
-              <h3 className="modal-title">添加新设备</h3>
+              <h3 className="modal-title">{isEditMode ? '编辑设备' : '添加新设备'}</h3>
               
               <div className="input-group">
                 <label className="input-label">设备名称</label>
@@ -263,8 +328,18 @@ const AssetTrackerApp: React.FC = () => {
               </div>
 
               <div className="modal-actions">
-                <button className="btn btn-cancel" onClick={() => setIsModalOpen(false)}>取消</button>
-                <button className="btn btn-confirm" onClick={handleAddDevice}>完成</button>
+                <button 
+                  className="btn btn-cancel" 
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    resetForm();
+                  }}
+                >
+                  取消
+                </button>
+                <button className="btn btn-confirm" onClick={handleAddDevice}>
+                  {isEditMode ? '保存' : '完成'}
+                </button>
               </div>
             </div>
           </div>
